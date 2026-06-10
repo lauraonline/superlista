@@ -1,5 +1,4 @@
-import React from 'react';
-
+import React, { useState } from 'react';
 import { 
   StyleSheet, 
   Text, 
@@ -14,18 +13,34 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 
 export default function App() {
-  // Dados mock
-  const dadosIniciais = [
-    { id: '1', nome: 'Arroz 5kg' },
-    { id: '2', nome: 'Feijão Preto' },
-    { id: '3', nome: 'Leite' }
-  ];
+  // Estados
+  const [textoInput, setTextoInput] = useState(''); // Campo de entrada
+  const [listaItens, setListaItens] = useState([]); // Lista de compras (começa vazia)
+
+  const adicionarItem = () => {
+    if (textoInput.trim() === '') {
+      return; // Se estiver vazio, não faz nada
+    }
+    const novoItem = {
+      id: Date.now().toString(),
+      nome: textoInput
+    };
+    // Coloca o novo item no topo da lista
+    setListaItens([novoItem, ...listaItens]);
+    setTextoInput('');
+  };
+
+  const removerItem = (idParaRemover) => {
+    // Cria uma lista nova omitindo o item a ser removido
+    const novaLista = listaItens.filter((item) => item.id !== idParaRemover);
+    setListaItens(novaLista);
+  };
 
   // Renderizador de itens
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
       <Text style={styles.itemTexto}>{item.nome}</Text>
-      <TouchableOpacity style={styles.botaoRemover}>
+      <TouchableOpacity style={styles.botaoRemover} onPress={() => removerItem(item.id)}> // Aciona a função de remover com o ID do item
         <MaterialIcons name="delete" size={24} color="#f44336" />
       </TouchableOpacity>
     </View>
@@ -47,19 +62,29 @@ export default function App() {
           style={styles.input}
           placeholder="Adicionar novo produto..."
           placeholderTextColor="#999"
+          value={textoInput} // Vincula o campo ao estado
+          onChangeText={setTextoInput} // Atualiza o estado conforme o usuário digita
+          onSubmitEditing={adicionarItem} // Permite adicionar apertando "Enter" no teclado
         />
-        <TouchableOpacity style={styles.botaoAdicionar}>
+        <TouchableOpacity style={styles.botaoAdicionar} onPress={adicionarItem}>
           <MaterialIcons name="add" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
 
       {/* Lista */}
-      <FlatList
-        data={dadosIniciais}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={styles.lista}
-      />
+      {listaItens.length === 0 ? (
+        <View style={styles.listaVazia}>
+          <MaterialIcons name="remove-shopping-cart" size={64} color="#ccc" />
+          <Text style={styles.textoVazio}>Sua lista está vazia!</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={listaItens}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={styles.lista}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -72,7 +97,7 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: '#4CAF50',
-    paddingTop: 40, // Espaço da barra de status
+    paddingTop: 40, // Espaço pra barra de status
     paddingBottom: 20,
     flexDirection: 'row',
     alignItems: 'center',
@@ -100,8 +125,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 15,
     fontSize: 16,
-    elevation: 2, // Sombra no android
-    shadowColor: '#000', // Sombra no web/iOS
+    elevation: 2,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -140,5 +165,16 @@ const styles = StyleSheet.create({
   },
   botaoRemover: {
     padding: 5,
+  },
+  listaVazia: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 50,
+  },
+  textoVazio: {
+    fontSize: 18,
+    color: '#ccc',
+    marginTop: 10,
   }
 });
