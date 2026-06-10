@@ -7,7 +7,8 @@ import {
   TouchableOpacity, 
   FlatList, 
   SafeAreaView, 
-  StatusBar 
+  StatusBar,
+  Image
 } from 'react-native';
 
 import { MaterialIcons } from '@expo/vector-icons';
@@ -16,8 +17,10 @@ export default function App() {
   // Estados
   const [textoInput, setTextoInput] = useState(''); // Campo de entrada
   const [listaItens, setListaItens] = useState([]); // Lista de compras (começa vazia)
+  const [hamster, setHamster] = useState(false);
 
   const adicionarItem = () => {
+    setHamster(false);
     if (textoInput.trim() === '') {
       return; // Se estiver vazio, não faz nada
     }
@@ -40,7 +43,7 @@ export default function App() {
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
       <Text style={styles.itemTexto}>{item.nome}</Text>
-      <TouchableOpacity style={styles.botaoRemover} onPress={() => removerItem(item.id)}> // Aciona a função de remover com o ID do item
+      <TouchableOpacity style={styles.botaoRemover} onPress={() => removerItem(item.id)}>
         <MaterialIcons name="delete" size={24} color="#f44336" />
       </TouchableOpacity>
     </View>
@@ -62,9 +65,9 @@ export default function App() {
           style={styles.input}
           placeholder="Adicionar novo produto..."
           placeholderTextColor="#999"
-          value={textoInput} // Vincula o campo ao estado
-          onChangeText={setTextoInput} // Atualiza o estado conforme o usuário digita
-          onSubmitEditing={adicionarItem} // Permite adicionar apertando "Enter" no teclado
+          value={textoInput}
+          onChangeText={setTextoInput}
+          onSubmitEditing={adicionarItem}
         />
         <TouchableOpacity style={styles.botaoAdicionar} onPress={adicionarItem}>
           <MaterialIcons name="add" size={24} color="#fff" />
@@ -74,9 +77,20 @@ export default function App() {
       {/* Lista */}
       {listaItens.length === 0 ? (
         <View style={styles.listaVazia}>
-          <MaterialIcons name="remove-shopping-cart" size={64} color="#ccc" />
-          <Text style={styles.textoVazio}>Sua lista está vazia!</Text>
-        </View>
+          <TouchableOpacity onPress={() => setHamster(!hamster)}>
+            {hamster ? (
+              <Image 
+              source={{ uri: 'https://media.tenor.com/SP05MWh2XroAAAAi/hamostor.gif' }} 
+              style={{ width: 150, height: 150 }} 
+            />
+      ) : (
+        <MaterialIcons name="remove-shopping-cart" size={64} color="#ccc" />
+      )}
+          </TouchableOpacity>
+    <Text style={styles.textoVazio}>
+      {hamster ? "Hello World" : "Sua lista está vazia!"}
+    </Text>
+  </View>
       ) : (
         <FlatList
           data={listaItens}
@@ -174,7 +188,7 @@ const styles = StyleSheet.create({
   },
   textoVazio: {
     fontSize: 18,
-    color: '#ccc',
+    color: '#999',
     marginTop: 10,
   }
 });
